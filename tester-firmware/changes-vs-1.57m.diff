@@ -1,0 +1,97 @@
+--- ComponentTester-1.57m/config.h	2026-06-23 16:33:39.000000000 +0200
++++ buildF/config.h	2026-11-11 19:16:25.644220065 +0100
+@@ -1335,8 +1335,8 @@
+  *  - enable one
+  */
+ 
+-#define POWER_SWITCH_SOFT
+-//#define POWER_SWITCH_MANUAL
++//#define POWER_SWITCH_SOFT
++#define POWER_SWITCH_MANUAL
+ 
+ 
+ /*
+@@ -1347,9 +1347,9 @@
+  *  - uncomment one of the modes
+  */
+ 
+-//#define BAT_NONE
++#define BAT_NONE
+ //#define BAT_DIRECT
+-#define BAT_DIVIDER
++//#define BAT_DIVIDER
+ 
+ 
+ /*
+@@ -1671,7 +1671,7 @@
+  *  - uncomment either SERIAL_BITBANG or SERIAL_HARDWARE to enable
+  */
+ 
+-//#define SERIAL_BITBANG             /* bit-bang serial */
++#define SERIAL_BITBANG             /* bit-bang serial */
+ //#define SERIAL_HARDWARE            /* hardware serial */
+ //#define SERIAL_RW                  /* enable serial read support */
+ 
+--- ComponentTester-1.57m/config_328.h	2026-06-08 14:22:38.000000000 +0200
++++ buildF/config_328.h	2026-11-11 19:16:25.644128835 +0100
+@@ -626,7 +626,7 @@
+  *  - uses LCD_CS to support rotary encoder in parallel at PD2/3
+  */
+ 
+-//#if 0
++#if 0
+ #define LCD_ST7565R                     /* display controller ST7565R */
+ #define LCD_GRAPHIC                     /* graphic display */
+ #define LCD_SPI                         /* SPI interface */
+@@ -641,9 +641,9 @@
+ /* display settings */
+ #define LCD_DOTS_X       128            /* number of horizontal dots */
+ #define LCD_DOTS_Y       64             /* number of vertical dots */
+-#define LCD_OFFSET_X                    /* enable x offset of 4 dots */
++//#define LCD_OFFSET_X                    /* enable x offset of 4 dots */
+ //#define LCD_FLIP_X                      /* enable horizontal flip */
+-#define LCD_FLIP_Y                      /* enable vertical flip */
++//#define LCD_FLIP_Y                      /* enable vertical flip */
+ #define LCD_START_Y      0              /* start line (0-63) */
+ #define LCD_CONTRAST     22             /* default contrast (0-63) */
+ //#define LCD_LONG_RESET                   /* long reset for NT7538 */
+@@ -669,7 +669,7 @@
+ #define SPI_DDR          LCD_DDR        /* SPI port data direction register */
+ #define SPI_SCK          LCD_SCL        /* port pin used for SCK */
+ #define SPI_MOSI         LCD_SI         /* port pin used for MOSI */
+-//#endif
++#endif
+ 
+ 
+ 
+@@ -858,7 +858,7 @@
+  *  VT100 serial terminal, TTL serial
+  */
+ 
+-#if 0
++//#if 0
+ #define LCD_VT100                       /* pseudo display VT100 */
+ #define LCD_TEXT                        /* character display */
+ #define LCD_COLOR                       /* color display */
+@@ -866,7 +866,7 @@
+ #define LCD_CHAR_Y       24             /* number of lines */
+ #define SERIAL_BITBANG                  /* bit-bang serial */
+ //#define SERIAL_HARDWARE                 /* hardware serial */
+-#endif
++//#endif
+ 
+ 
+ 
+@@ -1050,9 +1050,9 @@
+ #define SERIAL_PORT      PORTD     /* port data register */
+ #define SERIAL_DDR       DDRD      /* port data direction register */
+ #define SERIAL_PIN       PIND      /* port input pins register */
+-#define SERIAL_TX        PD1       /* pin for Tx (transmit) */
+-#define SERIAL_RX        PD0       /* pin for Rx (receive) */
+-#define SERIAL_PCINT     16        /* PCINT# for Rx pin */
++#define SERIAL_TX        PD6       /* pin for Tx (transmit) */
++#define SERIAL_RX        PD4       /* pin for Rx (receive) */
++#define SERIAL_PCINT     20        /* PCINT# for Rx pin */
+ 
+ 
+ /*

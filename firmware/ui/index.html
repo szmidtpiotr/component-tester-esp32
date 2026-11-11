@@ -1,0 +1,550 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Component Tester · Colorbox Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#262420;--surface:#302D29;--raised:#3A3732;--ink:#EDE9E2;--muted:#BFB9AF;--line:#57524A;
+  --amber:#E2A33B;--teal:#2E8C86;--verm:#D4553A;--teal-t:#6CC3BB;--verm-t:#F08E76;
+  --display:"Space Grotesk",system-ui,sans-serif;--body:"Inter",system-ui,sans-serif;
+  --mono:ui-monospace,"JetBrains Mono",Menlo,Consolas,monospace;
+  --r-sm:4px;--r-md:8px;--r-lg:14px;
+}
+@media (prefers-color-scheme:light){:root{
+  --paper:#F3F1EC;--surface:#E9E6E0;--raised:#FFFFFF;--ink:#17181A;--muted:#4A4E55;--line:#CFCAC2;
+  --teal-t:#1F6B66;--verm-t:#B8432B;}}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.5 var(--body)}
+a{color:var(--teal-t)}
+header{display:flex;align-items:center;gap:14px;padding:18px 28px;border-bottom:1px solid var(--line)}
+header svg.logo{width:40px;height:40px}
+header h1{font:700 22px/1 var(--display);margin:0;letter-spacing:-.3px}
+header h1 small{display:block;font:400 12px/1.4 var(--body);color:var(--muted);letter-spacing:0;margin-top:3px}
+.chip{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);
+  background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:5px 12px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--line)}
+.dot.ok{background:var(--teal)}.dot.bad{background:var(--verm)}
+nav{display:flex;gap:4px;padding:0 28px;border-bottom:1px solid var(--line);overflow-x:auto}
+nav button{background:none;border:0;color:var(--muted);font:500 14px var(--body);padding:12px 14px;cursor:pointer;
+  border-bottom:2px solid transparent;white-space:nowrap}
+nav button.on{color:var(--ink);border-bottom-color:var(--teal)}
+main{padding:24px 28px;max-width:1120px;margin:0 auto}
+section{display:none}section.on{display:block}
+.grid{display:grid;grid-template-columns:minmax(280px,420px) 1fr;gap:24px}
+@media (max-width:820px){.grid{grid-template-columns:1fr}header,nav,main{padding-left:16px;padding-right:16px}}
+@media (max-width:600px){header{flex-wrap:wrap}.chip{order:3;margin-left:0;flex-basis:100%}.lang{margin-left:auto}}
+.card{background:var(--surface);border-radius:var(--r-lg);padding:24px}
+.card h2{font:700 13px/1 var(--display);text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0 0 16px}
+.big{font:700 26px/1.15 var(--display);margin:0 0 4px;letter-spacing:-.4px}
+.sub{color:var(--muted);font-size:13px;margin:0 0 18px;font-family:var(--mono)}
+.btn{font:500 15px var(--body);border-radius:var(--r-md);padding:10px 18px;cursor:pointer;border:1px solid var(--line);
+  background:var(--raised);color:var(--ink)}
+.btn:hover{border-color:var(--teal)}
+.btn.primary{background:var(--teal);border-color:var(--teal);color:#17181A;font-weight:500}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn:disabled{opacity:.55;cursor:wait}
+.btn:focus-visible,nav button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.sym{background:var(--raised);border-radius:var(--r-md);aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;margin-bottom:18px}
+.sym svg{width:100%;height:100%}
+.sym .wire{stroke:var(--ink);stroke-width:2.2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.sym .fill{fill:var(--ink)}
+.sym .pin circle{fill:var(--paper);stroke:var(--teal);stroke-width:2.2}
+.sym .pin text{fill:var(--ink);font:700 15px var(--display);text-anchor:middle;dominant-baseline:central}
+.sym .lbl{fill:var(--muted);font:500 14px var(--display)}
+.sym .val{fill:var(--verm-t);font:500 13px var(--mono);text-anchor:middle}
+.legend{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;font-size:14px}
+.legend b{font:700 14px var(--display);display:inline-flex;width:24px;height:24px;border-radius:50%;
+  border:2px solid var(--teal);align-items:center;justify-content:center}
+table{width:100%;border-collapse:collapse}
+td{padding:11px 4px;border-bottom:1px solid var(--line);vertical-align:top}
+td.k{font:500 15px var(--display);width:30%}
+td.v{font:500 16px var(--mono);color:var(--verm-t);text-align:right;white-space:nowrap}
+td.i{width:34px;text-align:right}
+.info{width:24px;height:24px;border-radius:50%;border:1px solid var(--line);background:none;color:var(--muted);
+  cursor:pointer;font:600 12px var(--display)}
+.info[aria-expanded=true]{border-color:var(--teal);color:var(--teal-t)}
+tr.hint td{color:var(--muted);font-size:13.5px;padding-top:0;border-bottom:1px solid var(--line)}
+tr.hint{display:none}tr.hint.on{display:table-row}
+.kname{display:block;font:400 12.5px var(--body);color:var(--muted)}
+.empty{color:var(--muted);text-align:center;padding:30px 10px}
+.lcd{background:var(--raised);border-radius:var(--r-md);padding:18px 20px;font:15px/1.45 var(--mono);min-height:13em;
+  white-space:pre;overflow:auto;border:1px solid var(--line)}
+.note{color:var(--muted);font-size:13.5px;margin:12px 0 0}
+.hist{display:flex;flex-direction:column;gap:6px;margin-top:6px}
+.hist button{text-align:left;background:var(--raised);border:1px solid transparent;border-radius:var(--r-sm);padding:9px 12px;
+  color:var(--ink);cursor:pointer;font:14px var(--body);display:flex;justify-content:space-between;gap:12px}
+.hist button:hover{border-color:var(--line)}
+.hist button.sel{border-color:var(--teal)}
+.hist small{color:var(--muted);font-family:var(--mono)}
+label{display:block;font-size:13px;color:var(--muted);margin:14px 0 6px}
+input,select{width:100%;font:15px var(--body);padding:10px 12px;border-radius:var(--r-sm);border:1px solid var(--line);
+  background:var(--raised);color:var(--ink)}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 18px;font-size:14px}
+.kv span:nth-child(odd){color:var(--muted)}
+.kv span:nth-child(even){font-family:var(--mono)}
+.bar{height:6px;background:var(--raised);border-radius:3px;overflow:hidden;margin-top:12px}
+.bar i{display:block;height:100%;width:0;background:var(--teal);transition:width .2s}
+.stack{display:flex;flex-direction:column;gap:24px}
+pre.code{background:var(--raised);border-radius:var(--r-sm);padding:12px 14px;font:13px/1.5 var(--mono);overflow:auto;margin:10px 0 0}
+.lang{display:flex;border:1px solid var(--line);border-radius:999px;overflow:hidden}
+.lang button{background:none;border:0;color:var(--muted);font:600 12px var(--display);padding:6px 10px;cursor:pointer}
+.lang button.on{background:var(--raised);color:var(--ink)}
+.diamond{display:inline-block;width:8px;height:8px;background:var(--amber);transform:rotate(45deg);margin-right:8px}
+</style>
+</head>
+<body>
+<header>
+  <svg class="logo" viewBox="2 8 104 104" aria-hidden="true">
+    <polygon points="28,58 58,75 58,110 28,93" fill="currentColor"/><polygon points="62,75 92,58 92,93 62,110" fill="currentColor"/>
+    <polygon points="24,52 56,35 44,10 12,27" fill="currentColor"/><polygon points="60,50 68,58 60,66 52,58" fill="#D4553A"/>
+    <polygon points="70,22 78,30 70,38 62,30" fill="#E2A33B"/><polygon points="87,14 93,20 87,26 81,20" fill="#2E8C86"/>
+  </svg>
+  <h1><span data-i18n="title"></span><small data-i18n="subtitle"></small></h1>
+  <div class="chip" id="chip"><span class="dot" id="dot"></span><span id="chipTxt"></span></div>
+  <div class="lang" role="group" aria-label="Language"><button data-lang="pl">PL</button><button data-lang="en">EN</button></div>
+</header>
+<nav>
+  <button class="on" data-t="measure" data-i18n="tabMeasure"></button>
+  <button data-t="panel" data-i18n="tabPanel"></button>
+  <button data-t="settings" data-i18n="tabSettings"></button>
+  <button data-t="api">API</button>
+</nav>
+<main>
+
+<section id="measure" class="on">
+  <div class="grid">
+    <div class="card">
+      <h2 data-i18n="inSocket"></h2>
+      <div class="sym" id="sym"><div class="empty" data-i18n-html="putPart"></div></div>
+      <p class="big" id="name">—</p>
+      <p class="sub" id="raw"></p>
+      <p class="note" id="when" style="margin:-10px 0 16px"></p>
+      <div class="legend" id="legend"></div>
+      <div class="row" style="margin-top:20px">
+        <button class="btn primary" id="measureBtn" data-i18n="measure"></button>
+        <span class="note" id="mstate" style="margin:0"></span>
+      </div>
+    </div>
+    <div class="stack">
+      <div class="card">
+        <h2 data-i18n="params"></h2>
+        <table id="params"><tr><td class="empty" data-i18n="noMeasurement"></td></tr></table>
+      </div>
+      <div class="card">
+        <div class="row" style="justify-content:space-between;margin-bottom:10px"><h2 style="margin:0" data-i18n="history"></h2>
+          <button class="btn" id="histClear" style="padding:5px 10px;font-size:13px" data-i18n="clear"></button></div>
+        <div class="hist" id="hist"><span class="note" data-i18n="empty"></span></div>
+        <p class="note" id="histInfo"></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="panel">
+  <div class="grid">
+    <div class="card">
+      <h2 data-i18n="screen"></h2>
+      <div class="lcd" id="lcd">—</div>
+      <p class="note" data-i18n="screenNote"></p>
+    </div>
+    <div class="card">
+      <h2 data-i18n="button"></h2>
+      <div class="row">
+        <button class="btn" data-b="ms=150" data-i18n="short"></button>
+        <button class="btn" data-b="ms=600" data-i18n="long"></button>
+        <button class="btn" data-b="ms=100&count=2&gap=150" data-i18n="menu"></button>
+        <button class="btn" id="reset" data-i18n="restart"></button>
+      </div>
+      <p class="note"><span class="diamond"></span><span data-i18n="menuHint"></span></p>
+      <p class="note" data-i18n-html="menuNav"></p>
+      <p class="note" data-i18n-html="calib"></p>
+    </div>
+  </div>
+</section>
+
+<section id="settings">
+  <div class="grid">
+    <div class="card">
+      <h2>Wi-Fi</h2>
+      <div class="kv" id="wifiInfo"></div>
+      <div class="row" style="margin-top:18px"><button class="btn" id="scan" data-i18n="scan"></button></div>
+      <label for="ssid" data-i18n="network"></label>
+      <select id="ssidSel"><option value="" data-i18n="pickFirst"></option></select>
+      <input id="ssid" data-i18n-ph="ssidPh" style="margin-top:8px" autocomplete="off">
+      <label for="pass" data-i18n="password"></label>
+      <input id="pass" type="password" autocomplete="off">
+      <div class="row" style="margin-top:18px"><button class="btn primary" id="wifiSave" data-i18n="saveConnect"></button></div>
+      <p class="note" id="wifiMsg" data-i18n-html="wifiNote"></p>
+    </div>
+    <div class="card">
+      <h2 data-i18n="update"></h2>
+      <p class="note" style="margin-top:0" data-i18n-html="updateNote"></p>
+      <input type="file" id="fw" accept=".bin" style="margin-top:10px">
+      <div class="row" style="margin-top:14px"><button class="btn primary" id="fwGo" data-i18n="uploadWifi"></button></div>
+      <div class="bar"><i id="fwBar"></i></div>
+      <p class="note" id="fwMsg"></p>
+      <h2 style="margin-top:28px" data-i18n="device"></h2>
+      <div class="kv" id="devInfo"></div>
+    </div>
+  </div>
+</section>
+
+<section id="api">
+  <div class="card">
+    <h2>API</h2>
+    <p data-i18n-html="apiText"></p>
+    <pre class="code">curl -X POST http://tester.local/measure
+curl http://tester.local/screen
+curl -X POST "http://tester.local/button?ms=100&amp;count=2&amp;gap=150"</pre>
+  </div>
+</section>
+</main>
+
+<script>
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+// ---- translations (PL / EN) ----
+const I18N={
+ pl:{title:'Tester elementów',subtitle:'colorbox studio · warsztat',connecting:'łączę…',tabMeasure:'Pomiar',tabPanel:'Panel testera',tabSettings:'Ustawienia',
+  inSocket:'Element w podstawce',putPart:'Włóż element do podstawki<br>i naciśnij „Zmierz”.',measure:'Zmierz',params:'Parametry',noMeasurement:'Brak pomiaru.',
+  history:'Historia pomiarów',clear:'Wyczyść',empty:'Pusto.',screen:'Ekran testera',screenNote:'To, co tester pokazałby na swoim wyświetlaczu (40×24 znaki, na żywo).',
+  button:'Przycisk testera',short:'Krótko',long:'Długo',menu:'Menu (2× krótko)',restart:'Restart',
+  menuHint:'Menu otwiera się tylko wtedy, gdy na ekranie stoi wynik — nie w trakcie „Probing…”.',
+  menuNav:'W menu: <b>krótko</b> = następna pozycja, <b>długo</b> = uruchom. Kolejność: PWM, IR detector, Opto Coupler, Test, Adjustment, Save, Load, Show Values, Exit.',
+  calib:'Kalibracja: zewrzyj styki 1-2-3 → Menu → Adjustment (długo) → zdejmij zwarcie, gdy pojawi się „Remove Short Circuit!” → Save → #1.',
+  scan:'Szukaj sieci',scanning:'szukam…',network:'Sieć',pickFirst:'— najpierw „Szukaj sieci” albo wpisz niżej —',pick:'— wybierz —',ssidPh:'nazwa sieci (SSID)',password:'Hasło',
+  saveConnect:'Zapisz i połącz',open:'otwarta',
+  wifiNote:'Gdy tester nie ma zapisanej sieci albo nie znajdzie jej przez 20 s po starcie, wystawia własną otwartą sieć <b>Tester-Setup</b> — połącz się z nią telefonem i ustaw Wi-Fi tutaj.',
+  apNote:'<b>Tester nie połączył się z siecią.</b> Kliknij „Szukaj sieci”, wybierz swoją, wpisz hasło i „Zapisz i połącz”. Potem wróć do swojej sieci i wejdź na <b>http://tester.local/</b>.',
+  update:'Aktualizacja programu',updateNote:'Plik <code>firmware.bin</code> z kompilacji PlatformIO (<code>.pio/build/esp32c3/firmware.bin</code>).',uploadWifi:'Wgraj przez Wi-Fi',
+  device:'Urządzenie',apiText:'Pełny opis z możliwością wysyłania zapytań: <a href="/docs">/docs</a> (Swagger UI) · specyfikacja <a href="/openapi.json">/openapi.json</a>.',
+  none:'Nie znaleziono elementu',manyTitle:'{0} złącza diodowe — to nie jest pojedynczy element',
+  manyNote:'Tester znalazł {0} złącza półprzewodnikowe między stykami i nie umie ich złożyć w jeden element. Tak wygląda pomiar układu scalonego (stabilizatora typu LM317/78xx, wzmacniacza, transoptora…) albo uszkodzonego tranzystora. Takiego elementu tester nie zidentyfikuje — zostaje nadruk.',
+  xNote:'„x” = styk, którego roli tester nie ustalił. Przy dziwnych typach (JFET z jednym znanym stykiem) to często układ scalony, nie tranzystor — sprawdź nadruk.',
+  bjt:'Tranzystor bipolarny {0}',igbt:'Tranzystor IGBT, kanał {0}',mosfet:'MOSFET z kanałem {0} ({1})',dep:'zubożany',enh:'wzbogacany',jfet:'JFET z kanałem {0}',
+  SCR:'Tyrystor',Triac:'Triak',UJT:'Tranzystor jednozłączowy (UJT)',PUT:'PUT',
+  diode:'Dioda',res:'Rezystor',cap:'Kondensator',ind:'Cewka',box:'Element',twoDiodes:'Dwie diody',twoRes:'Dwa rezystory (lub potencjometr)',
+  L_x:'nieustalony',L_C:'Kolektor',L_B:'Baza',L_E:'Emiter',L_G:'Bramka',L_D:'Dren',L_S:'Źródło',L_A:'Anoda',L_K:'Katoda',
+  noClock:'czas nieznany (przed synchronizacją zegara)',measNo:'Pomiar #{0}',
+  symMany:'Wiele złączy — prawdopodobnie układ scalony.<br>Tester nie rysuje układów scalonych.',symNone:'Tester nie widzi elementu.<br>Sprawdź, czy nóżki dotykają styków.',
+  symUnknown:'Brak rysunku dla tego typu.',nothing:'Nic do pokazania.',noParams:'Brak parametrów.',pins:'styki {0}',what:'Co to znaczy?',
+  measuring:'mierzę… (ok. 5 s)',doneIn:'gotowe w {0} s',noResult:'brak wyniku: ',connErr:'błąd połączenia',
+  stored:'Zapisanych: {0} (pokazuję ostatnie {1}). Historia przetrwa restart i aktualizację.',clearConfirm:'Usunąć całą historię pomiarów z pamięci testera?',
+  lastScreen:'(ostatni ekran — tester właśnie przerysowuje)',emptyScreen:'(pusty ekran)',
+  setupMode:'tryb konfiguracji (Tester-Setup)',mode:'Tryb',modeAp:'sieć konfiguracyjna',modeSta:'klient Wi-Fi',address:'Adres',signal:'Sygnał',
+  program:'Program',uptime:'Czas pracy',name:'Nazwa',storedRes:'Zapisane pomiary',clock:'Zegar',notSynced:'niezsynchronizowany',noConn:'brak połączenia',
+  giveSsid:'Podaj nazwę sieci.',saved:'Zapisane. Tester restartuje się i łączy z „{0}”. Wróć pod http://tester.local/ za ok. 20 s.',saveFail:'Nie udało się zapisać.',
+  pickBin:'Wybierz plik .bin.',uploaded:'Wgrane. Restart… odśwież stronę za ok. 15 s.',error:'Błąd: ',uploadFail:'Błąd przesyłania.',sending:'wysyłam…'},
+ en:{title:'Component Tester',subtitle:'colorbox studio · workshop',connecting:'connecting…',tabMeasure:'Measure',tabPanel:'Tester panel',tabSettings:'Settings',
+  inSocket:'Part in the socket',putPart:'Put a part into the socket<br>and press “Measure”.',measure:'Measure',params:'Parameters',noMeasurement:'No measurement yet.',
+  history:'Measurement history',clear:'Clear',empty:'Empty.',screen:'Tester screen',screenNote:'What the tester would show on its own display (40×24 characters, live).',
+  button:'Tester button',short:'Short',long:'Long',menu:'Menu (2× short)',restart:'Restart',
+  menuHint:'The menu only opens while a result is on the screen — not during “Probing…”.',
+  menuNav:'In the menu: <b>short</b> = next item, <b>long</b> = run it. Order: PWM, IR detector, Opto Coupler, Test, Adjustment, Save, Load, Show Values, Exit.',
+  calib:'Self-adjustment: short probes 1-2-3 → Menu → Adjustment (long) → remove the short when “Remove Short Circuit!” appears → Save → #1.',
+  scan:'Scan networks',scanning:'scanning…',network:'Network',pickFirst:'— press “Scan networks” first or type below —',pick:'— choose —',ssidPh:'network name (SSID)',password:'Password',
+  saveConnect:'Save and connect',open:'open',
+  wifiNote:'If the tester has no saved network or cannot find it within 20 s of starting, it opens its own open network <b>Tester-Setup</b> — join it with a phone and set Wi-Fi here.',
+  apNote:'<b>The tester is not connected to a network.</b> Press “Scan networks”, pick yours, enter the password and press “Save and connect”. Then go back to your own network and open <b>http://tester.local/</b>.',
+  update:'Firmware update',updateNote:'The <code>firmware.bin</code> file from the PlatformIO build (<code>.pio/build/esp32c3/firmware.bin</code>).',uploadWifi:'Upload over Wi-Fi',
+  device:'Device',apiText:'Full description where you can try every request: <a href="/docs">/docs</a> (Swagger UI) · specification <a href="/openapi.json">/openapi.json</a>.',
+  none:'No component found',manyTitle:'{0} diode junctions — not a single component',
+  manyNote:'The tester found {0} semiconductor junctions between the probes and cannot combine them into one part. This is what an integrated circuit looks like (LM317/78xx regulator, amplifier, optocoupler…) or a damaged transistor. The tester cannot identify it — read the marking instead.',
+  xNote:'“x” = a pin whose role the tester could not determine. With odd types (a JFET with one known pin) it is usually an IC, not a transistor — check the marking.',
+  bjt:'Bipolar transistor {0}',igbt:'IGBT, {0}-channel',mosfet:'{0}-channel MOSFET ({1})',dep:'depletion',enh:'enhancement',jfet:'{0}-channel JFET',
+  SCR:'Thyristor (SCR)',Triac:'Triac',UJT:'Unijunction transistor (UJT)',PUT:'PUT',
+  diode:'Diode',res:'Resistor',cap:'Capacitor',ind:'Inductor',box:'Part',twoDiodes:'Two diodes',twoRes:'Two resistors (or a potentiometer)',
+  L_x:'unknown',L_C:'Collector',L_B:'Base',L_E:'Emitter',L_G:'Gate',L_D:'Drain',L_S:'Source',L_A:'Anode',L_K:'Cathode',
+  noClock:'time unknown (clock not synced yet)',measNo:'Measurement #{0}',
+  symMany:'Many junctions — probably an integrated circuit.<br>The tester does not draw ICs.',symNone:'The tester sees nothing.<br>Check that the leads touch the contacts.',
+  symUnknown:'No drawing for this type.',nothing:'Nothing to show.',noParams:'No parameters.',pins:'pins {0}',what:'What does it mean?',
+  measuring:'measuring… (about 5 s)',doneIn:'done in {0} s',noResult:'no result: ',connErr:'connection error',
+  stored:'Stored: {0} (showing the last {1}). History survives restarts and updates.',clearConfirm:'Delete the whole measurement history from the tester?',
+  lastScreen:'(last screen — the tester is redrawing)',emptyScreen:'(empty screen)',
+  setupMode:'setup mode (Tester-Setup)',mode:'Mode',modeAp:'setup network',modeSta:'Wi-Fi client',address:'Address',signal:'Signal',
+  program:'Firmware',uptime:'Uptime',name:'Name',storedRes:'Stored results',clock:'Clock',notSynced:'not synced',noConn:'no connection',
+  giveSsid:'Enter a network name.',saved:'Saved. The tester restarts and joins “{0}”. Open http://tester.local/ again in about 20 s.',saveFail:'Could not save.',
+  pickBin:'Choose a .bin file.',uploaded:'Uploaded. Restarting… reload the page in about 15 s.',error:'Error: ',uploadFail:'Upload failed.',sending:'uploading…'}
+};
+const HINTS={
+  hFE:{pl:['Wzmocnienie prądowe','Ile razy prąd kolektora jest większy od prądu bazy. Małe tranzystory: 100–800. Litera po liczbie: „e” = mierzone w układzie wspólnego emitera, „c” = wspólnego kolektora.'],
+       en:['Current gain','How many times larger the collector current is than the base current. Small transistors: 100–800. Letter after the number: “e” = measured in common-emitter, “c” = common-collector configuration.']},
+  Vbe:{pl:['Napięcie baza–emiter','Spadek napięcia na złączu baza–emiter przy przewodzeniu. Krzem: ok. 0,6–0,75 V; german: 0,2–0,35 V; Darlington: 1,2–1,6 V.'],
+       en:['Base–emitter voltage','Voltage drop across the base–emitter junction when conducting. Silicon: about 0.6–0.75 V; germanium: 0.2–0.35 V; Darlington: 1.2–1.6 V.']},
+  Iceo:{pl:['Prąd upływu C–E','Prąd płynący przez zamknięty tranzystor (baza wolna). Dobry krzemowy: nA. Kilka µA i więcej — podejrzany albo germanowy.'],
+        en:['C–E leakage current','Current through the switched-off transistor (base open). A good silicon part: nA. A few µA or more — suspicious, or germanium.']},
+  Cbe:{pl:['Pojemność baza–emiter','Pojemność złącza B–E w pikofaradach. Informacyjnie; im większy tranzystor, tym większa.'],
+       en:['Base–emitter capacitance','Capacitance of the B–E junction in picofarads. For information; larger transistors have more.']},
+  Vf:{pl:['Napięcie przewodzenia','Spadek napięcia na diodzie, gdy przewodzi (przy kilku mA). Krzemowa: 0,6–0,75 V; Schottky: 0,15–0,45 V; LED: 1,6–3,3 V (zależnie od koloru).'],
+      en:['Forward voltage','Voltage drop across the diode when it conducts (at a few mA). Silicon: 0.6–0.75 V; Schottky: 0.15–0.45 V; LED: 1.6–3.3 V (depends on colour).']},
+  C:{pl:['Pojemność','Pojemność elementu (dla diody: pojemność złącza w kierunku zaporowym).'],en:['Capacitance','Capacitance of the part (for a diode: junction capacitance in reverse direction).']},
+  I_R:{pl:['Prąd wsteczny','Prąd upływu diody w kierunku zaporowym. Krzemowa: nA; Schottky: µA.'],en:['Reverse current','Diode leakage in reverse direction. Silicon: nA; Schottky: µA.']},
+  Vth:{pl:['Napięcie progowe bramki','Napięcie G–S, przy którym MOSFET zaczyna przewodzić. „Logic level”: 1–2 V; zwykłe: 2–4 V.'],en:['Gate threshold voltage','G–S voltage at which the MOSFET starts to conduct. Logic-level: 1–2 V; standard: 2–4 V.']},
+  Cgs:{pl:['Pojemność bramki','Pojemność G–S. Duża pojemność = wolniejsze przełączanie, większy prąd sterowania.'],en:['Gate capacitance','G–S capacitance. More capacitance = slower switching, more drive current.']},
+  Rds:{pl:['Rezystancja kanału','Opór D–S włączonego MOSFET-a przy napięciu sterowania testera (ok. 5 V). Dla „logic level” bliski katalogowemu.'],en:['Channel resistance','D–S resistance of the switched-on MOSFET at the tester drive voltage (about 5 V). Close to the datasheet value for logic-level parts.']},
+  Idss:{pl:['Prąd nasycenia JFET','Prąd drenu przy zwartej bramce ze źródłem.'],en:['JFET saturation current','Drain current with the gate shorted to the source.']},
+  'V_GS(off)':{pl:['Napięcie odcięcia','Napięcie G–S, przy którym JFET (lub MOSFET zubożany) przestaje przewodzić.'],en:['Cut-off voltage','G–S voltage at which a JFET (or depletion MOSFET) stops conducting.']},
+  I_l:{pl:['Prąd upływu','Prąd płynący przez wyłączony element.'],en:['Leakage current','Current through the switched-off part.']},
+  ESR:{pl:['Rezystancja szeregowa','„ESR” kondensatora. Dla elektrolitów im mniej, tym lepiej; wysoki ESR = zużyty kondensator.'],en:['Equivalent series resistance','Capacitor ESR. For electrolytics lower is better; high ESR = worn-out capacitor.']},
+  Vloss:{pl:['Strata napięcia','Ile procent napięcia kondensator traci zaraz po naładowaniu. Elektrolit: kilka %; ceramiczny/foliowy: ok. 0 %. Duża strata = upływ.'],en:['Voltage loss','How many percent of the voltage the capacitor loses right after charging. Electrolytic: a few %; ceramic/film: about 0 %. A large loss = leakage.']},
+  VT:{pl:['Napięcie przełączenia','Napięcie wyzwolenia (tyrystor, triak, UJT).'],en:['Trigger voltage','Trigger voltage (thyristor, triac, UJT).']},
+  R:{pl:['Rezystancja','Opór elementu między wskazanymi stykami.'],en:['Resistance','Resistance between the given pins.']},
+  L:{pl:['Indukcyjność','Indukcyjność cewki.'],en:['Inductance','Inductance of the coil.']},
+};
+let LANG=localStorage.getItem('lang')||((navigator.language||'').toLowerCase().startsWith('pl')?'pl':'en');
+const t=(k,...a)=>{let s=I18N[LANG][k]??I18N.en[k]??k;a.forEach((v,i)=>{s=s.split('{'+i+'}').join(v)});return s};
+const locale=()=>LANG==='pl'?'pl-PL':'en-GB';
+function applyLang(){
+  document.documentElement.lang=LANG;
+  document.querySelectorAll('[data-i18n]').forEach(e=>e.textContent=t(e.dataset.i18n));
+  document.querySelectorAll('[data-i18n-html]').forEach(e=>e.innerHTML=t(e.dataset.i18nHtml));
+  document.querySelectorAll('[data-i18n-ph]').forEach(e=>e.placeholder=t(e.dataset.i18nPh));
+  document.querySelectorAll('[data-lang]').forEach(b=>b.classList.toggle('on',b.dataset.lang===LANG));
+  if(window.lastShown)render(window.lastShown); loadResults(); loadStatus();
+}
+document.querySelectorAll('[data-lang]').forEach(b=>b.onclick=()=>{LANG=b.dataset.lang;localStorage.setItem('lang',LANG);applyLang()});
+
+// ---- tabs (also follow #measure / #panel / #settings / #api / #result-N in the address) ----
+function showTab(name){
+  document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x.dataset.t===name));
+  document.querySelectorAll('section').forEach(s=>s.classList.toggle('on',s.id===name));
+  if(name==='settings')loadStatus();
+}
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{location.hash=b.dataset.t});
+function fromHash(){
+  const h=location.hash.slice(1);
+  if(h.startsWith('result-')){showTab('measure');fetch('/result?id='+h.slice(7)).then(r=>r.ok?r.json():null).then(j=>{if(j)render(j)}).catch(()=>{});return}
+  if(document.getElementById(h)&&document.querySelector(`nav button[data-t="${h}"]`))showTab(h);
+}
+window.addEventListener('hashchange',fromHash);
+
+// ---- parse a result screen into a model ----
+function parse(lines){
+  const L=lines.filter(x=>x!=='');
+  const m={raw:L,kind:'unknown',title:'',pins:{},params:[],chain:null};
+  if(!L.length)return m;
+  const head=L.slice(0,2).join(' ');
+  if(/No component/i.test(head)){m.kind='none';m.title=t('none');return m}
+  let md=L[0].match(/^->\|-\s*(\d+)$/);
+  if(md){m.kind='many';m.title=t('manyTitle',md[1]);m.note=t('manyNote',md[1]);return m}
+  let pinLine=L.find(x=>/^\d{3}=\S{3}$/.test(x));                 // "123=CBE"
+  if(pinLine){const [n,l]=pinLine.split('=');[...n].forEach((d,i)=>m.pins[d]=l[i]);}
+  const chainLine=L.find(x=>/^\d-.+-\d$/.test(x));                // "1->|-3", "1-[]-2-[]-3", "1-||-3"
+  const used=new Set([pinLine,chainLine]);
+  if(/^BJT/.test(L[0])){m.kind='bjt';m.pol=/PNP/.test(head)?'PNP':'NPN';m.title=t('bjt',m.pol)}
+  else if(/IGBT/.test(head)){m.kind='igbt';m.pol=/P-ch|PNP/.test(head)?'P':'N';m.title=t('igbt',m.pol)}
+  else if(/MOS/.test(head)){m.kind='mosfet';m.pol=/P-ch/.test(head)?'P':'N';m.dep=/dep/.test(head);m.title=t('mosfet',m.pol,t(m.dep?'dep':'enh'))}
+  else if(/FET/.test(head)){m.kind='jfet';m.pol=/P-ch/.test(head)?'P':'N';m.title=t('jfet',m.pol)}
+  else if(/^SCR/.test(L[0])){m.kind='scr';m.title=t('SCR')}
+  else if(/^Triac/.test(L[0])){m.kind='triac';m.title=t('Triac')}
+  else if(/^(UJT|PUT)/.test(L[0])){m.kind='generic3';m.title=t(L[0].slice(0,3))}
+  else if(chainLine){m.kind='chain';m.chain=parseChain(chainLine);m.title=chainTitle(m.chain)}
+  else {m.kind='unknown';m.title=L[0]}
+  if(m.kind!=='chain'&&m.kind!=='unknown'){used.add(L[0]); if(L[1]&&L[1]!==pinLine&&/(-ch|enh|dep|NPN|PNP)/.test(L[1]))used.add(L[1]);}
+  let bare=[];
+  for(const x of L){
+    if(used.has(x))continue;
+    const sp=x.indexOf(' '); const k=sp>0?x.slice(0,sp):'';
+    if(k&&!/^[\d.]+[a-zA-Zµ]*$/.test(k)) m.params.push({k,v:x.slice(sp+1)});
+    else bare.push(...x.split(/\s+/));
+  }
+  if(m.chain){                                                    // bare values belong to chain parts in order
+    let j=0; m.chain.parts.forEach(p=>{if(bare[j]!==undefined)p.value=bare[j++]});
+    const pre=m.chain.parts.filter(p=>p.value).map(p=>({k:p.type==='res'?'R':p.type==='cap'?'C':p.type==='ind'?'L':p.type,v:p.value,label:`${p.a}–${p.b}`}));
+    m.params=pre.concat(m.params);
+  }
+  if(Object.values(m.pins).includes('x'))m.note=t('xNote');
+  return m;
+}
+function parseChain(s){
+  const nodes=[],parts=[];const re=/(\d)|(-[^\d]+-)/g;let tk,last=null;
+  while((tk=re.exec(s))){ if(tk[1]){nodes.push(tk[1]); if(last){last.b=tk[1];parts.push(last);last=null}}
+    else{const seg=tk[2];let type='box';
+      if(seg.includes('->|'))type='diode';else if(seg.includes('|<-'))type='diodeR';else if(seg.includes('[]'))type='res';
+      else if(seg.includes('||'))type='cap';else if(/ww|~|\(\)/.test(seg))type='ind';
+      last={type,a:nodes[nodes.length-1],seg}} }
+  return {nodes,parts};
+}
+function chainTitle(c){
+  const types=c.parts.map(p=>p.type==='diodeR'?'diode':p.type);
+  if(types.length===1)return t(types[0]);
+  if(types.every(x=>x==='diode'))return t('twoDiodes');
+  if(types.every(x=>x==='res'))return t('twoRes');
+  return types.map(x=>t(x)).join(' + ');
+}
+
+// ---- SVG symbols ----
+const pinBadge=(x,y,n)=>`<g class="pin"><circle cx="${x}" cy="${y}" r="14"/><text x="${x}" y="${y}">${n}</text></g>`;
+function pinOf(m,letter){return Object.keys(m.pins).find(k=>m.pins[k]===letter)||'?'}
+function svg3(m){
+  // three-terminal: left = control (B/G), top = C/D/A, bottom = E/S/K
+  const L={bjt:['B','C','E'],mosfet:['G','D','S'],jfet:['G','D','S'],igbt:['G','C','E'],scr:['G','A','K'],triac:['G','2','1']}[m.kind]||Object.values(m.pins);
+  const [lc,lt,lb]=L; const nC=pinOf(m,lc),nT=pinOf(m,lt),nB=pinOf(m,lb);
+  let body='';
+  if(m.kind==='bjt'||m.kind==='igbt'){
+    body=`<circle class="wire" cx="200" cy="150" r="62"/><line class="wire" x1="90" y1="150" x2="178" y2="150"/>
+      <line class="wire" x1="178" y1="112" x2="178" y2="188" style="stroke-width:5"/>
+      <line class="wire" x1="178" y1="130" x2="225" y2="95"/><line class="wire" x1="225" y1="95" x2="225" y2="55"/>
+      <line class="wire" x1="178" y1="170" x2="225" y2="205"/><line class="wire" x1="225" y1="205" x2="225" y2="245"/>`;
+    body+= m.pol==='PNP'||m.pol==='P' ? `<polygon class="fill" points="184,174 200,172 194,186"/>`
+                                       : `<polygon class="fill" points="225,205 207,203 216,190"/>`;
+  } else if(m.kind==='mosfet'||m.kind==='jfet'){
+    body=`<circle class="wire" cx="200" cy="150" r="62"/><line class="wire" x1="90" y1="${m.kind==='jfet'?150:175}" x2="168" y2="${m.kind==='jfet'?150:175}"/>
+      ${m.kind==='mosfet'?'<line class="wire" x1="168" y1="120" x2="168" y2="180"/>':''}
+      <line class="wire" x1="182" y1="115" x2="182" y2="185" style="stroke-width:5${m.kind==='mosfet'&&!m.dep?';stroke-dasharray:14 8':''}"/>
+      <line class="wire" x1="182" y1="125" x2="225" y2="125"/><line class="wire" x1="225" y1="125" x2="225" y2="55"/>
+      <line class="wire" x1="182" y1="175" x2="225" y2="175"/><line class="wire" x1="225" y1="175" x2="225" y2="245"/>
+      ${m.kind==='mosfet'?'<line class="wire" x1="182" y1="150" x2="225" y2="150"/><line class="wire" x1="225" y1="150" x2="225" y2="175"/>':''}`;
+    body+= m.pol==='N' ? `<polygon class="fill" points="184,150 198,143 198,157"/>` : `<polygon class="fill" points="214,150 200,143 200,157"/>`;
+  } else if(m.kind==='scr'||m.kind==='triac'){
+    body=`<line class="wire" x1="225" y1="55" x2="225" y2="120"/><polygon class="wire" points="195,120 255,120 225,170"/>
+      <line class="wire" x1="195" y1="170" x2="255" y2="170"/><line class="wire" x1="225" y1="170" x2="225" y2="245"/>
+      <line class="wire" x1="90" y1="200" x2="205" y2="200"/><line class="wire" x1="205" y1="200" x2="215" y2="172"/>`;
+  } else {
+    body=`<rect class="wire" x="160" y="100" width="100" height="100" rx="8"/><line class="wire" x1="90" y1="150" x2="160" y2="150"/>
+      <line class="wire" x1="225" y1="55" x2="225" y2="100"/><line class="wire" x1="225" y1="200" x2="225" y2="245"/>`;
+  }
+  return `<svg viewBox="0 0 400 300">${body}
+    ${pinBadge(72,150,nC)}<text class="lbl" x="58" y="128">${lc}</text>
+    ${pinBadge(225,40,nT)}<text class="lbl" x="248" y="44">${lt}</text>
+    ${pinBadge(225,260,nB)}<text class="lbl" x="248" y="264">${lb}</text></svg>`;
+}
+function svgChain(c){
+  const n=c.nodes.length, W=400, x0=40, step=(W-2*x0)/(n-1), y=150;
+  let s=`<svg viewBox="0 0 400 300">`;
+  c.parts.forEach((p,i)=>{
+    const xa=x0+i*step, xb=xa+step, xm=(xa+xb)/2;
+    s+=`<line class="wire" x1="${xa+14}" y1="${y}" x2="${xm-22}" y2="${y}"/><line class="wire" x1="${xm+22}" y1="${y}" x2="${xb-14}" y2="${y}"/>`;
+    if(p.type==='res') s+=`<rect class="wire" x="${xm-22}" y="${y-11}" width="44" height="22" rx="2"/>`;
+    else if(p.type==='cap') s+=`<line class="wire" x1="${xm-22}" y1="${y}" x2="${xm-6}" y2="${y}"/><line class="wire" x1="${xm+6}" y1="${y}" x2="${xm+22}" y2="${y}"/>
+      <line class="wire" x1="${xm-6}" y1="${y-24}" x2="${xm-6}" y2="${y+24}" style="stroke-width:4"/><line class="wire" x1="${xm+6}" y1="${y-24}" x2="${xm+6}" y2="${y+24}" style="stroke-width:4"/>`;
+    else if(p.type==='diode'||p.type==='diodeR'){const d=p.type==='diode'?1:-1;
+      s+=`<line class="wire" x1="${xm-22}" y1="${y}" x2="${xm+22}" y2="${y}"/><polygon class="fill" points="${xm-14*d},${y-16} ${xm-14*d},${y+16} ${xm+12*d},${y}"/>
+      <line class="wire" x1="${xm+12*d}" y1="${y-17}" x2="${xm+12*d}" y2="${y+17}" style="stroke-width:3.5"/>`}
+    else if(p.type==='ind'){s+=`<path class="wire" d="M${xm-22} ${y} a5.5 7 0 0 1 11 0 a5.5 7 0 0 1 11 0 a5.5 7 0 0 1 11 0 a5.5 7 0 0 1 11 0"/>`}
+    else s+=`<rect class="wire" x="${xm-22}" y="${y-16}" width="44" height="32" rx="6"/>`;
+    if(p.value)s+=`<text class="val" x="${xm}" y="${y+50}">${esc(p.value)}</text>`;
+    if(p.type==='diode'||p.type==='diodeR'){
+      s+=`<text class="lbl" x="${xa}" y="${y-30}" text-anchor="middle">${p.type==='diode'?'A':'K'}</text><text class="lbl" x="${xb}" y="${y-30}" text-anchor="middle">${p.type==='diode'?'K':'A'}</text>`}
+  });
+  c.nodes.forEach((d,i)=>s+=pinBadge(x0+i*step,y,d));
+  return s+'</svg>';
+}
+
+// ---- render ----
+const fmtTs=ts=>ts?new Date(ts*1000).toLocaleString(locale(),{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'}):t('noClock');
+let shownId=null;
+function render(r){
+  window.lastShown=r;
+  const m=parse(r.lines||[]);
+  shownId=r.id||null;
+  $('#when').textContent=r.id?`${t('measNo',r.id)} · ${fmtTs(r.ts)}${r.ms?` · ${(r.ms/1000).toFixed(1)} s`:''}`:'';
+  if(r.id&&$('#measure').classList.contains('on')&&location.hash!=='#result-'+r.id)history.replaceState(null,'','#result-'+r.id);
+  document.querySelectorAll('.hist button').forEach(b=>b.classList.toggle('sel',+b.dataset.id===r.id));
+  $('#name').textContent=m.title||'—';
+  $('#raw').textContent=(r.lines||[]).filter(Boolean).join(' · ');
+  const sym=$('#sym');
+  if(m.kind==='many') sym.innerHTML=`<div class="empty">${t('symMany')}</div>`;
+  else if(m.kind==='none'||m.kind==='unknown'&&!m.raw.length) sym.innerHTML=`<div class="empty">${t('symNone')}</div>`;
+  else if(m.kind==='chain') sym.innerHTML=svgChain(m.chain);
+  else if(m.kind==='unknown') sym.innerHTML=`<div class="empty">${t('symUnknown')}</div>`;
+  else sym.innerHTML=svg3(m);
+  let lg='';
+  if(Object.keys(m.pins).length) for(const k of Object.keys(m.pins).sort()) lg+=`<b>${k}</b><span>${I18N[LANG]['L_'+m.pins[k]]||m.pins[k]} (${m.pins[k]})</span>`;
+  else if(m.chain) m.chain.parts.forEach(p=>{if(p.type==='diode')lg+=`<b>${p.a}</b><span>${t('L_A')}</span><b>${p.b}</b><span>${t('L_K')}</span>`;
+    else if(p.type==='diodeR')lg+=`<b>${p.a}</b><span>${t('L_K')}</span><b>${p.b}</b><span>${t('L_A')}</span>`});
+  if(m.note)lg+=`<span></span><span class="note" style="margin:4px 0 0">${esc(m.note)}</span>`;
+  $('#legend').innerHTML=lg;
+  const tb=$('#params');
+  if(!m.params.length){tb.innerHTML=`<tr><td class="empty">${m.kind==='none'?t('nothing'):t('noParams')}</td></tr>`;return}
+  tb.innerHTML=m.params.map((p,i)=>{
+    const h=HINTS[p.k]&&HINTS[p.k][LANG]; const lab=p.label?` <span class="kname">${t('pins',p.label)}</span>`:(h?`<span class="kname">${h[0]}</span>`:'');
+    return `<tr><td class="k">${esc(p.k)}${lab}</td><td class="v">${esc(p.v)}</td><td class="i">${h?`<button class="info" aria-expanded="false" data-i="${i}" title="${t('what')}">i</button>`:''}</td></tr>
+      ${h?`<tr class="hint" id="h${i}"><td colspan="3">${esc(h[1])}</td></tr>`:''}`}).join('');
+  tb.querySelectorAll('.info').forEach(b=>b.onclick=()=>{const r=$('#h'+b.dataset.i);const on=r.classList.toggle('on');b.setAttribute('aria-expanded',on)});
+}
+
+// ---- measuring ----
+let busy=false;
+async function measure(){
+  if(busy)return; busy=true; const b=$('#measureBtn'); b.disabled=true; $('#mstate').textContent=t('measuring');
+  try{const r=await fetch('/measure?mode=reset',{method:'POST'});const j=await r.json();
+    if(j.ok){render(j);$('#mstate').textContent=t('doneIn',(j.ms/1000).toFixed(1))}else{$('#mstate').textContent=t('noResult')+(j.error||'')}
+    loadResults();
+  }catch(e){$('#mstate').textContent=t('connErr')}
+  b.disabled=false; busy=false;
+}
+$('#measureBtn').onclick=measure;
+async function loadResults(){
+  try{const j=await (await fetch('/results?limit=50')).json();const h=$('#hist');
+    $('#histInfo').textContent=j.total?t('stored',j.total,j.results.length):'';
+    if(!j.results.length){h.innerHTML=`<span class="note">${t('empty')}</span>`;return}
+    h.innerHTML='';j.results.slice().reverse().forEach(r=>{const m=parse(r.lines);const b=document.createElement('button');
+      b.dataset.id=r.id; if(r.id===shownId)b.classList.add('sel');
+      b.innerHTML=`<span>#${r.id} · ${esc(m.title)}</span><small>${esc(r.lines.filter(Boolean).slice(1,3).join(' · '))} · ${r.ts?new Date(r.ts*1000).toLocaleString(locale(),{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'—'}</small>`;
+      b.onclick=()=>{render(r);window.scrollTo({top:0,behavior:'smooth'})};h.appendChild(b)});
+  }catch(e){}
+}
+$('#histClear').onclick=async()=>{if(!confirm(t('clearConfirm')))return;
+  await fetch('/results/clear',{method:'POST'});loadResults()};
+
+// ---- panel ----
+document.querySelectorAll('[data-b]').forEach(b=>b.onclick=async()=>{busy=true;b.disabled=true;
+  try{const j=await (await fetch('/button?'+b.dataset.b,{method:'POST'})).json();$('#lcd').textContent=j.rows.join('\n')}catch(e){}
+  b.disabled=false;busy=false});
+$('#reset').onclick=async()=>{busy=true;await fetch('/reset',{method:'POST'});busy=false};
+async function pollScreen(){
+  if(!busy&&$('#panel').classList.contains('on')){try{const j=await (await fetch('/screen')).json();
+    if(j.rows.length)$('#lcd').textContent=j.rows.join('\n');
+    else{const h=await (await fetch('/history')).json();const l=h.screens[h.screens.length-1];
+      $('#lcd').textContent=l?l.text+'\n'+t('lastScreen'):t('emptyScreen')}}catch(e){}}
+  setTimeout(pollScreen,800);
+}
+
+// ---- status / settings ----
+async function loadStatus(){
+  try{const s=await (await fetch('/status')).json();
+    $('#dot').className='dot '+(s.mode==='ap'?'bad':'ok');
+    if(s.mode==='ap'&&!loadStatus.apShown){loadStatus.apShown=true;           // setup mode: go straight to Wi-Fi
+      showTab('settings'); history.replaceState(null,'','#settings');
+      $('#wifiMsg').innerHTML=t('apNote'); $('#scan').click();}
+    $('#chipTxt').textContent=s.mode==='ap'?t('setupMode'):`${s.ssid} · ${s.ip}`;
+    $('#wifiInfo').innerHTML=`<span>${t('mode')}</span><span>${s.mode==='ap'?t('modeAp'):t('modeSta')}</span>
+      <span>${t('network')}</span><span>${esc(s.ssid||'—')}</span><span>${t('address')}</span><span>${s.ip}</span><span>${t('signal')}</span><span>${s.rssi} dBm</span>`;
+    $('#devInfo').innerHTML=`<span>${t('program')}</span><span>${s.fw}</span><span>${t('uptime')}</span><span>${Math.round(s.uptime_s/60)} min</span>
+      <span>${t('name')}</span><span>tester.local</span><span>${t('storedRes')}</span><span>${s.results_stored} (${s.fs_used_kb}/${s.fs_total_kb} kB)</span>
+      <span>${t('clock')}</span><span>${s.time?fmtTs(s.time):t('notSynced')}</span><span>MAC</span><span>${s.mac}</span>`;
+  }catch(e){$('#dot').className='dot bad';$('#chipTxt').textContent=t('noConn')}
+}
+$('#scan').onclick=async()=>{const b=$('#scan');b.disabled=true;b.textContent=t('scanning');
+  try{const j=await (await fetch('/wifi/scan')).json();const s=$('#ssidSel');
+    s.innerHTML=`<option value="">${t('pick')}</option>`+j.networks.map(n=>`<option>${esc(n.ssid)}</option>`).join('');
+    j.networks.forEach((n,i)=>s.options[i+1].textContent=`${n.ssid}  (${n.rssi} dBm${n.open?', '+t('open'):''})`);
+    s.onchange=()=>{$('#ssid').value=j.networks[s.selectedIndex-1]?.ssid||''};
+  }catch(e){}
+  b.disabled=false;b.textContent=t('scan')};
+$('#wifiSave').onclick=async()=>{const ssid=$('#ssid').value.trim();if(!ssid){$('#wifiMsg').textContent=t('giveSsid');return}
+  const body=new URLSearchParams({ssid,pass:$('#pass').value});
+  try{await fetch('/wifi',{method:'POST',body});$('#wifiMsg').textContent=t('saved',ssid)}
+  catch(e){$('#wifiMsg').textContent=t('saveFail')}};
+$('#fwGo').onclick=()=>{const f=$('#fw').files[0];if(!f){$('#fwMsg').textContent=t('pickBin');return}
+  const x=new XMLHttpRequest();const fd=new FormData();fd.append('firmware',f,f.name);
+  x.upload.onprogress=e=>{if(e.lengthComputable)$('#fwBar').style.width=(100*e.loaded/e.total)+'%'};
+  x.onload=()=>{$('#fwMsg').textContent=x.status===200?t('uploaded'):t('error')+x.responseText};
+  x.onerror=()=>{$('#fwMsg').textContent=t('uploadFail')};
+  x.open('POST','/update');x.send(fd);$('#fwMsg').textContent=t('sending')};
+
+// ---- start ----
+$('#chipTxt').textContent=t('connecting');
+applyLang(); setInterval(loadStatus,15000); pollScreen();
+if(location.hash.length>1)fromHash();
+if(!location.hash.startsWith('#result-'))fetch('/last').then(r=>r.ok?r.json():null).then(j=>{if(j)render(j)}).catch(()=>{});
+</script>
+</body>
+</html>

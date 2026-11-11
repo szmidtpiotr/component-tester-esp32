@@ -1,0 +1,76 @@
+connectors:
+  Tester:
+    type: LCR-T4 tester (ATmega328P)
+    subtype: ISP header + resistor pads
+    pinlabels: [5V (ISP), GND (ISP), RES (ISP), PD6 (27k pad), PD7 (27k pad)]
+  ESP32-C3:
+    type: ESP32-C3 SuperMini
+    pinlabels: [5V, GND, GPIO4, GPIO5, GPIO6]
+  R1:
+    type: Resistor 10 kΩ
+    pinlabels: [from tester, to ESP]
+  R2:
+    type: Resistor 20 kΩ (or 22 kΩ)
+    pinlabels: [GPIO4 side, GND side]
+  D1:
+    type: Diode 1N4148
+    pinlabels: [anode (tester), cathode / stripe (ESP)]
+  D2:
+    type: Diode 1N4148
+    pinlabels: [anode (tester), cathode / stripe (ESP)]
+
+cables:
+  Power:
+    wirecount: 2
+    colors: [RD, BK]
+    category: bundle
+  RX:
+    wirecount: 1
+    colors: [YE]
+    category: bundle
+  RXdiv:
+    wirecount: 2
+    colors: [YE, BK]
+    category: bundle
+  Btn:
+    wirecount: 1
+    colors: [GN]
+    category: bundle
+  BtnE:
+    wirecount: 1
+    colors: [GN]
+    category: bundle
+  Rst:
+    wirecount: 1
+    colors: [BU]
+    category: bundle
+  RstE:
+    wirecount: 1
+    colors: [BU]
+    category: bundle
+
+connections:
+  - - Tester: [1, 2]
+    - Power: [1, 2]
+    - ESP32-C3: [1, 2]
+  - - Tester: [4]
+    - RX: [1]
+    - R1: [1]
+  - - R1: [2]
+    - RXdiv: [1]
+    - ESP32-C3: [3]
+  - - R2: [1, 2]
+    - RXdiv: [1, 2]
+    - ESP32-C3: [3, 2]
+  - - Tester: [5]
+    - Btn: [1]
+    - D1: [1]
+  - - D1: [2]
+    - BtnE: [1]
+    - ESP32-C3: [4]
+  - - Tester: [3]
+    - Rst: [1]
+    - D2: [1]
+  - - D2: [2]
+    - RstE: [1]
+    - ESP32-C3: [5]

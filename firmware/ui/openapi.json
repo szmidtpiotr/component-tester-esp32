@@ -1,0 +1,478 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Component Tester (LCR-T4 + ESP32-C3)",
+    "version": "1.0.0",
+    "description": "ESP32-C3 bridge for an LCR-T4 class component tester running ComponentTester 1.57m in VT100 mode. Measure the part in the ZIF socket, read the tester's virtual screen, press its button, manage Wi-Fi and update the firmware. No authentication - keep it on your home network."
+  },
+  "servers": [
+    {
+      "url": "/"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Measure"
+    },
+    {
+      "name": "Tester"
+    },
+    {
+      "name": "Wi-Fi"
+    },
+    {
+      "name": "System"
+    }
+  ],
+  "paths": {
+    "/measure": {
+      "post": {
+        "tags": [
+          "Measure"
+        ],
+        "summary": "Measure the part in the socket",
+        "description": "Resets the tester (mode=reset, about 5 s), presses its button (mode=button) or waits for the next cycle (mode=next) and returns the first fresh result screen. The result is stored in the history.",
+        "parameters": [
+          {
+            "name": "mode",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "reset",
+                "button",
+                "next"
+              ],
+              "default": "reset"
+            }
+          },
+          {
+            "name": "timeout",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 20000
+            },
+            "description": "Limit in ms."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Result"
+                },
+                "example": {
+                  "ok": true,
+                  "mode": "reset",
+                  "ms": 4893,
+                  "type": "BJT PNP",
+                  "lines": [
+                    "BJT PNP",
+                    "123=CBE",
+                    "hFE 298 c",
+                    "Vbe 626mV",
+                    "Cbe 9pF"
+                  ],
+                  "values": {
+                    "123": "CBE",
+                    "hFE": "298 c",
+                    "Vbe": "626mV",
+                    "Cbe": "9pF"
+                  }
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "No fresh result within the timeout"
+          }
+        }
+      }
+    },
+    "/last": {
+      "get": {
+        "tags": [
+          "Measure"
+        ],
+        "summary": "Last result",
+        "responses": {
+          "200": {
+            "description": "Result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Result"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No measurement yet"
+          }
+        }
+      }
+    },
+    "/results": {
+      "get": {
+        "tags": [
+          "Measure"
+        ],
+        "summary": "Stored results (survive restarts)",
+        "responses": {
+          "200": {
+            "description": "List",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Result"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 50,
+              "maximum": 200
+            }
+          }
+        ]
+      }
+    },
+    "/screen": {
+      "get": {
+        "tags": [
+          "Tester"
+        ],
+        "summary": "Current tester screen (40x24)",
+        "responses": {
+          "200": {
+            "description": "Screen",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Screen"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/history": {
+      "get": {
+        "tags": [
+          "Tester"
+        ],
+        "summary": "Recent stable screens",
+        "responses": {
+          "200": {
+            "description": "Screens"
+          }
+        }
+      }
+    },
+    "/button": {
+      "post": {
+        "tags": [
+          "Tester"
+        ],
+        "summary": "Press the tester button",
+        "description": "short (ms=150) = next menu item; long (ms=600) = run it; 2x short (ms=100&count=2&gap=150) = open the menu (only while a result is on screen). Returns the screen after redraw.",
+        "parameters": [
+          {
+            "name": "ms",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 150
+            }
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "maximum": 5
+            }
+          },
+          {
+            "name": "gap",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 150
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Screen",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Screen"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/reset": {
+      "post": {
+        "tags": [
+          "Tester"
+        ],
+        "summary": "Restart the tester",
+        "responses": {
+          "200": {
+            "description": "Screen"
+          }
+        }
+      }
+    },
+    "/wifi/scan": {
+      "get": {
+        "tags": [
+          "Wi-Fi"
+        ],
+        "summary": "Scan Wi-Fi networks",
+        "responses": {
+          "200": {
+            "description": "Networks",
+            "content": {
+              "application/json": {
+                "example": {
+                  "networks": [
+                    {
+                      "ssid": "HomeWiFi",
+                      "rssi": -58,
+                      "open": false
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/wifi": {
+      "post": {
+        "tags": [
+          "Wi-Fi"
+        ],
+        "summary": "Save a network and restart",
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "ssid"
+                ],
+                "properties": {
+                  "ssid": {
+                    "type": "string"
+                  },
+                  "pass": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Saved, restarting in 1 s"
+          }
+        }
+      }
+    },
+    "/update": {
+      "post": {
+        "tags": [
+          "System"
+        ],
+        "summary": "Firmware update over Wi-Fi",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "firmware": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Uploaded, restarting"
+          },
+          "500": {
+            "description": "Error"
+          }
+        }
+      }
+    },
+    "/status": {
+      "get": {
+        "tags": [
+          "System"
+        ],
+        "summary": "Device status",
+        "responses": {
+          "200": {
+            "description": "Status",
+            "content": {
+              "application/json": {
+                "example": {
+                  "fw": "1.0.0",
+                  "uptime_s": 120,
+                  "mode": "sta",
+                  "ssid": "HomeWiFi",
+                  "ip": "192.168.1.50",
+                  "rssi": -60,
+                  "mac": "AA:BB:CC:DD:EE:FF"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/result": {
+      "get": {
+        "tags": [
+          "Measure"
+        ],
+        "summary": "One stored result",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Result"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found"
+          }
+        }
+      }
+    },
+    "/results/clear": {
+      "post": {
+        "tags": [
+          "Measure"
+        ],
+        "summary": "Delete the history",
+        "responses": {
+          "200": {
+            "description": "Cleared"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Result": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "mode": {
+            "type": "string"
+          },
+          "ms": {
+            "type": "integer"
+          },
+          "type": {
+            "type": "string",
+            "description": "First result line, e.g. \"BJT PNP\", \"1->|-3\" (diode), \"1-[]-3\" (resistor), \"1-||-3\" (capacitor)."
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "values": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Key -> value, e.g. hFE, Vbe, Vf, ESR; key \"123\" = pinout (e.g. CBE)."
+          },
+          "id": {
+            "type": "integer",
+            "description": "Measurement number (increases, survives restarts)."
+          },
+          "ts": {
+            "type": "integer",
+            "description": "Measurement time, Unix seconds (UTC); 0 = clock not synced yet."
+          }
+        }
+      },
+      "Screen": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "version": {
+            "type": "integer"
+          },
+          "stable_ms": {
+            "type": "integer",
+            "description": "Milliseconds since the screen last changed."
+          },
+          "clears": {
+            "type": "integer"
+          }
+        }
+      }
+    }
+  }
+}

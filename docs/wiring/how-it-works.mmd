@@ -1,0 +1,7 @@
+flowchart LR
+    P["Part in the ZIF socket"] --> T["Tester ATmega328P<br/>ComponentTester 1.57m<br/>VT100 display mode"]
+    T -- "screen text, 9600 baud<br/>PD6 via 10k/20k divider" --> E["ESP32-C3<br/>virtual 40x24 screen<br/>parser and history"]
+    E -- "RESET and button<br/>via 1N4148 diodes" --> T
+    E -- "5 V from USB" --> T
+    E -- "Wi-Fi: web page and HTTP API" --> B["Browser / phone"]
+    E -- "Wi-Fi: HTTP API" --> A["Scripts and AI agents"]
